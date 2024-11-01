@@ -6,7 +6,11 @@ class DatabaseManager:
         self.connection = connection
 
     async def add_warn(
-        self, user_id: int, server_id: int, moderator_id: int, reason: str
+        self,
+        user_id: int,
+        server_id: int,
+        moderator_id: int,
+        reason: str,
     ) -> int:
         """
         This function will add a warn to the database.

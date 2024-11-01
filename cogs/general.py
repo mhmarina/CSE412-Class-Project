@@ -1,8 +1,8 @@
 from platform import python_version
 from random import choice
 
-from aiohttp import ClientSession
 import discord
+from aiohttp import ClientSession
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -27,17 +27,21 @@ class General(commands.Cog, name="general"):
     def __init__(self, bot) -> None:
         self.bot = bot
         self.context_menu_user = app_commands.ContextMenu(
-            name="Grab ID", callback=self.grab_id
+            name="Grab ID",
+            callback=self.grab_id,
         )
         self.bot.tree.add_command(self.context_menu_user)
         self.context_menu_message = app_commands.ContextMenu(
-            name="Remove spoilers", callback=self.remove_spoilers
+            name="Remove spoilers",
+            callback=self.remove_spoilers,
         )
         self.bot.tree.add_command(self.context_menu_message)
 
     # Message context menu command
     async def remove_spoilers(
-        self, interaction: discord.Interaction, message: discord.Message
+        self,
+        interaction: discord.Interaction,
+        message: discord.Message,
     ) -> None:
         """
         Removes the spoilers from the message. This command requires the MESSAGE_CONTENT intent to work properly.
@@ -61,7 +65,9 @@ class General(commands.Cog, name="general"):
 
     # User context menu command
     async def grab_id(
-        self, interaction: discord.Interaction, user: discord.User
+        self,
+        interaction: discord.Interaction,
+        user: discord.User,
     ) -> None:
         """
         Grabs the ID of the user.
@@ -76,12 +82,15 @@ class General(commands.Cog, name="general"):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @commands.hybrid_command(
-        name="help", description="List all commands the bot has loaded."
+        name="help",
+        description="List all commands the bot has loaded.",
     )
     async def help(self, context: Context) -> None:
         prefix = self.bot.config["prefix"]
         embed = discord.Embed(
-            title="Help", description="List of available commands:", color=0xBEBEFE
+            title="Help",
+            description="List of available commands:",
+            color=0xBEBEFE,
         )
         for i in self.bot.cogs:
             if i == "owner" and not (await self.bot.is_owner(context.author)):
@@ -94,7 +103,9 @@ class General(commands.Cog, name="general"):
                 data.append(f"{prefix}{command.name} - {description}")
             help_text = "\n".join(data)
             embed.add_field(
-                name=i.capitalize(), value=f"```{help_text}```", inline=False
+                name=i.capitalize(),
+                value=f"```{help_text}```",
+                inline=False,
             )
         await context.send(embed=embed)
 
@@ -115,7 +126,9 @@ class General(commands.Cog, name="general"):
         embed.set_author(name="Bot Information")
         embed.add_field(name="Owner:", value="Krypton#7331", inline=True)
         embed.add_field(
-            name="Python Version:", value=f"{python_version()}", inline=True
+            name="Python Version:",
+            value=f"{python_version()}",
+            inline=True,
         )
         embed.add_field(
             name="Prefix:",
@@ -143,14 +156,17 @@ class General(commands.Cog, name="general"):
         roles = ", ".join(roles)
 
         embed = discord.Embed(
-            title="**Server Name:**", description=f"{context.guild}", color=0xBEBEFE
+            title="**Server Name:**",
+            description=f"{context.guild}",
+            color=0xBEBEFE,
         )
         if context.guild.icon is not None:
             embed.set_thumbnail(url=context.guild.icon.url)
         embed.add_field(name="Server ID", value=context.guild.id)
         embed.add_field(name="Member Count", value=context.guild.member_count)
         embed.add_field(
-            name="Text/Voice Channels", value=f"{len(context.guild.channels)}"
+            name="Text/Voice Channels",
+            value=f"{len(context.guild.channels)}",
         )
         embed.add_field(name=f"Roles ({len(context.guild.roles)})", value=roles)
         embed.set_footer(text=f"Created at: {context.guild.created_at}")
@@ -268,7 +284,7 @@ class General(commands.Cog, name="general"):
         # This will prevent bot from stopping everything when doing a web request - see: https://discordpy.readthedocs.io/en/stable/faq.html#how-do-i-make-a-web-request
         async with ClientSession() as session:
             async with session.get(
-                "https://api.coindesk.com/v1/bpi/currentprice/BTC.json"
+                "https://api.coindesk.com/v1/bpi/currentprice/BTC.json",
             ) as request:
                 if request.status == 200:
                     data = await request.json()
@@ -286,7 +302,8 @@ class General(commands.Cog, name="general"):
                 await context.send(embed=embed)
 
     @app_commands.command(
-        name="feedback", description="Submit a feedback for the owners of the bot"
+        name="feedback",
+        description="Submit a feedback for the owners of the bot",
     )
     async def feedback(self, interaction: discord.Interaction) -> None:
         """
@@ -303,7 +320,7 @@ class General(commands.Cog, name="general"):
             embed=discord.Embed(
                 description="Thank you for your feedback, the owners have been notified about it.",
                 color=0xBEBEFE,
-            )
+            ),
         )
 
         app_owner = (await self.bot.application_info()).owner
@@ -312,7 +329,7 @@ class General(commands.Cog, name="general"):
                 title="New Feedback",
                 description=f"{interaction.user} (<@{interaction.user.id}>) has submitted a new feedback:\n```\n{feedback_form.answer}\n```",
                 color=0xBEBEFE,
-            )
+            ),
         )
 
 

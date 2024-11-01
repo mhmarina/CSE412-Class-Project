@@ -19,7 +19,7 @@ else:
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
         config = json.load(file)
 
-"""	
+"""
 Setup bot intents (events restrictions)
 For more information about intents, please go to the following websites:
 https://discordpy.readthedocs.io/en/latest/intents.html
@@ -105,7 +105,9 @@ console_handler.setFormatter(LoggingFormatter())
 # File handler
 file_handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 file_handler_formatter = logging.Formatter(
-    "[{asctime}] [{levelname:<8}] {name}: {message}", "%Y-%m-%d %H:%M:%S", style="{"
+    "[{asctime}] [{levelname:<8}] {name}: {message}",
+    "%Y-%m-%d %H:%M:%S",
+    style="{",
 )
 file_handler.setFormatter(file_handler_formatter)
 
@@ -135,10 +137,10 @@ class DiscordBot(commands.Bot):
 
     async def init_db(self) -> None:
         async with aiosqlite.connect(
-            f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db"
+            f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db",
         ) as db:
             with open(
-                f"{os.path.realpath(os.path.dirname(__file__))}/database/schema.sql"
+                f"{os.path.realpath(os.path.dirname(__file__))}/database/schema.sql",
             ) as file:
                 await db.executescript(file.read())
             await db.commit()
@@ -156,7 +158,7 @@ class DiscordBot(commands.Bot):
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
                     self.logger.error(
-                        f"Failed to load extension {extension}\n{exception}"
+                        f"Failed to load extension {extension}\n{exception}",
                     )
 
     @tasks.loop(minutes=1.0)
@@ -182,7 +184,7 @@ class DiscordBot(commands.Bot):
         self.logger.info(f"discord.py API version: {discord.__version__}")
         self.logger.info(f"Python version: {platform.python_version()}")
         self.logger.info(
-            f"Running on: {platform.system()} {platform.release()} ({os.name})"
+            f"Running on: {platform.system()} {platform.release()} ({os.name})",
         )
         self.logger.info("-------------------")
         await self.init_db()
@@ -190,8 +192,8 @@ class DiscordBot(commands.Bot):
         self.status_task.start()
         self.database = DatabaseManager(
             connection=await aiosqlite.connect(
-                f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db"
-            )
+                f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db",
+            ),
         )
 
     async def on_message(self, message: discord.Message) -> None:
@@ -215,11 +217,11 @@ class DiscordBot(commands.Bot):
         executed_command = str(split[0])
         if context.guild is not None:
             self.logger.info(
-                f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})"
+                f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})",
             )
         else:
             self.logger.info(
-                f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
+                f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs",
             )
 
     async def on_command_error(self, context: Context, error) -> None:
@@ -240,16 +242,17 @@ class DiscordBot(commands.Bot):
             await context.send(embed=embed)
         elif isinstance(error, commands.NotOwner):
             embed = discord.Embed(
-                description="You are not the owner of the bot!", color=0xE02B2B
+                description="You are not the owner of the bot!",
+                color=0xE02B2B,
             )
             await context.send(embed=embed)
             if context.guild:
                 self.logger.warning(
-                    f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild {context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot."
+                    f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the guild {context.guild.name} (ID: {context.guild.id}), but the user is not an owner of the bot.",
                 )
             else:
                 self.logger.warning(
-                    f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, but the user is not an owner of the bot."
+                    f"{context.author} (ID: {context.author.id}) tried to execute an owner only command in the bot's DMs, but the user is not an owner of the bot.",
                 )
         elif isinstance(error, commands.MissingPermissions):
             embed = discord.Embed(
