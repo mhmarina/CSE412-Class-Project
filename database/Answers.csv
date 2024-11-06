@@ -1,0 +1,162 @@
+a,1,Middle Ages,f
+b,1,The Industrial Revolution,t
+c,1,The Bronze Age,f
+a,2,Phoenix,f
+b,2,Salt Lake City,f
+c,2,Kansas City,t
+a,3,Mosquitoes,t
+b,3,Killer Sharks,f
+c,3,Humans,f
+a,4,DeathBerries,f
+b,4,Nightlock,t
+c,4,Apples,f
+a,11,2,f
+b,11,3,t
+c,11,4,f
+a,12,Elephant,t
+b,12,Hippopotamus,f
+c,12,Tortoise,f
+a,13,"2,000lbs",f
+b,13,"10,000lbs",f
+c,13,"6,000lbs",t
+a,14,Mottled Duck,f
+b,14,American Woodcock,f
+c,14,Arctic Tern,t
+a,15,pink,f
+b,15,black,t
+c,15,white,f
+a,16,China,f
+b,16,Iceland,t
+c,16,England,f
+a,17,38 minutes,t
+b,17,23 minutes,f
+c,17,52 minutes,f
+a,18,776,f
+b,18,887,t
+c,18,693,f
+a,19,60 million,f
+b,19,90 million,f
+c,19,75 million,t
+a,20,207 BC,f
+b,20,220 AD,f
+c,20,1878,t
+a,21,Asia,f
+b,21,South America,f
+c,21,Africa,t
+a,22,Chimborazo,t
+b,22,Everest,f
+c,22,K2,f
+a,23,North America,f
+b,23,Antarctica,t
+c,23,Africa,f
+a,24,Dead Sea,t
+b,24,Death Valley,f
+c,24,Purgatory,f
+a,25,Indonesia,f
+b,25,Philippines,f
+c,25,Sweden,t
+a,26,12.1cm,f
+b,26,7.5cm,t
+c,26,10.2cm,f
+a,27,56,f
+b,27,82,f
+c,27,33,t
+a,28,1875,f
+b,28,1963,t
+c,28,1632,f
+a,29,Jerry West,t
+b,29,Wilt Chamberlain,f
+c,29,Michael Jordan,f
+a,30,playing card,f
+b,30,cabbage leaf,t
+c,30,family portrait,f
+a,31,Ireland,f
+b,31,United States,f
+c,31,Japan,t
+a,32,1902,f
+b,32,1796,f
+c,32,1888,t
+a,33,Carlos,t
+b,33,Charles,f
+c,33,William,f
+a,34,Abigail Housemouse,f
+b,34,Anna Pocketmouse,f
+c,34,Amelia Fieldmouse,t
+a,35,The Nutcracker,t
+b,35,Swan Lake,f
+c,35,Romeo and Juliet,f
+a,36,3 hours,f
+b,36,39 minutes,t
+c,36,53 seconds,f
+a,37,30,f
+b,37,50,f
+c,37,90,t
+a,38,Sargasso Sea,t
+b,38,Black Sea,f
+c,38,Arabian Sea,f
+a,39,5mm,t
+b,39,1mm,f
+c,39,3mm,f
+a,40,United States,f
+b,40,China,f
+c,40,Papua New Guinea,t
+a,41,112,f
+b,41,76,f
+c,41,108,t
+a,42,93ft,f
+b,42,89ft,t
+c,42,78ft,f
+a,43,Basketball,f
+b,43,Soccer,f
+c,43,Baseball,t
+a,44,Golf,t
+b,44,Soccer,f
+c,44,Darts,f
+a,45,Crushed can,f
+b,45,Frozen cow poop,t
+c,45,Sliced fruit,f
+a,46,Deadpool,f
+b,46,Fight Club,t
+c,46,The Social Network,f
+a,47,"30,000",t
+b,47,"10,000",f
+c,47,"50,000",f
+a,48,Sexual Healing,f
+b,48,Cold Blooded,f
+c,48,Billie Jean,t
+a,49,Rudolph,f
+b,49,King Kong,t
+c,49,Viking,f
+a,50,Thomas Pennyfeather,f
+b,50,Thomas Mapother,t
+c,50,Thomas Wormwell,f
+a,51,2 years,f
+b,51,4 years,t
+c,51,6 years,f
+a,52,1600,t
+b,52,"106,000",f
+c,52,"57,000",f
+a,53,1812,f
+b,53,1884,f
+c,53,1797,t
+a,54,40,t
+b,54,0,f
+c,54,70,f
+a,55,1910,f
+b,55,1903,t
+c,55,1912,f
+a,56,1 week,t
+b,56,1 day,f
+c,56,1 hour,f
+a,57,15,f
+b,57,5,f
+c,57,10,t
+a,58,2,f
+b,58,4,f
+c,58,9,t
+a,59,White,f
+b,59,Pink,t
+c,59,Yellow,f
+a,60,Giant squid,t
+b,60,Blue whale,f
+c,60,African elephant,f
