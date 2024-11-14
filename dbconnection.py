@@ -3,7 +3,7 @@ import psycopg2
 import os
 
 # set environment variables like:
-# EXPORT DBUSER = "postgres" 
+# export DBUSER="postgres" 
 # etc
 
 class DBManager:
@@ -71,3 +71,46 @@ class DBManager:
         if(self.conn):
             self.conn.close()
             print("connection closed")
+        
+    def insert_user(self, u_userid, u_username):
+        self.cursor.execute('''
+        INSERT INTO Users(u_userid, u_totalScore, u_username) VALUES(%s, %s, %s);
+        ''', [u_userid, 0, u_username])
+        self.conn.commit()
+
+    def delete_user(self, u_userid):
+        self.cursor.execute('''
+        DELETE FROM Users where u_userid = %s;
+        ''', [u_userid])
+        self.conn.commit()
+
+    def select_top_players(self):
+        self.cursor.execute('''
+        SELECT u_userid FROM Users WHERE u_totalScore = (SELECT MAX(u_totalScore) FROM Users);  
+        ''')
+        return self.cursor.fetchall()
+    
+    def update_user_score(self, u_userid):
+        self.cursor.execute('''
+        UPDATE Users SET u_totalScore = u_totalscore+1 WHERE u_userid = %s;
+        ''', [u_userid])
+        self.conn.commit()
+
+# test:
+def main():
+    db = DBManager()
+    db.connect_and_init()
+    db.insert_user("1020192", "marina239")
+    print(db.select_top_players())
+    db.update_user_score("1020192")
+    db.update_user_score("1020192")
+    db.update_user_score("1020192")
+    db.insert_user("29", "pizzakdj")
+    print(db.select_top_players())
+    db.delete_user("1020192")
+    print(db.select_top_players())
+    db.insert_user("1020192", "marina239")
+    print(db.select_top_players())
+
+if __name__ == "__main__":
+    main()
