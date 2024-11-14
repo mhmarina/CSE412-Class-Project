@@ -73,9 +73,14 @@ class DBManager:
             print("connection closed")
         
     def insert_user(self, u_userid, u_username):
-        self.cursor.execute('''
-        INSERT INTO Users(u_userid, u_totalScore, u_username) VALUES(%s, %s, %s);
-        ''', [u_userid, 0, u_username])
+        try:
+            self.cursor.execute('''
+            INSERT INTO Users(u_userid, u_totalScore, u_username) VALUES(%s, %s, %s);
+            ''', [u_userid, 0, u_username])
+        except Exception as e:
+            self.conn.rollback()
+            print(e)
+            return
         self.conn.commit()
 
     def delete_user(self, u_userid):
