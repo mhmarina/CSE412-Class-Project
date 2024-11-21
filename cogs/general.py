@@ -1,5 +1,5 @@
 from platform import python_version
-
+import datetime
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -22,8 +22,10 @@ class FeedbackForm(discord.ui.Modal, title="Feeedback"):
 
 
 class General(commands.Cog, name="general"):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot, db) -> None:
         self.bot = bot
+        self.db = db
+        self.current_session_id = None
         self.context_menu_user = app_commands.ContextMenu(
             name="Grab ID",
             callback=self.grab_id,
@@ -34,6 +36,154 @@ class General(commands.Cog, name="general"):
             callback=self.remove_spoilers,
         )
         self.bot.tree.add_command(self.context_menu_message)
+
+    @commands.command()
+    async def test(self, ctx: Context):
+        """A simple test command."""
+        await ctx.send("The bot is working!")
+
+    @commands.command(name='startgame')
+    async def start_game(self, ctx: Context):
+        """Start a new trivia game."""
+        if self.current_session_id is not None:
+            await ctx.send("A game is already in progress!")
+            return
+
+         # Get user information
+        user_id = ctx.author.id  # Discord user ID
+        username = ctx.author.name  # Discord username
+
+        # Check if the user already exists in the database
+        try:
+            self.db.cursor.execute("SELECT COUNT(*) FROM users WHERE u_userid = %s;", [user_id])
+            user_exists = self.db.cursor.fetchone()[0]
+
+            if not user_exists:
+                # If user does not exist, add them to the database
+                self.db.insert_user(user_id, username)
+                print(f"User {username} (ID: {user_id}) added to the database.")
+            else:
+                print(f"User {username} (ID: {user_id}) already exists in the database.")
+
+        except Exception as e:
+            print(f"Error checking/adding user: {e}")
+            await ctx.send(f"Error adding user to the database: {e}")
+            return
+
+        # Create a new trivia session
+        self.current_session_id = int(datetime.datetime.now().timestamp())
+        start_time = datetime.datetime.now()
+
+        try:
+            self.db.insert_trivia_session(self.current_session_id, start_time)
+            await ctx.send(f'Trivia game started! Session ID: {self.current_session_id}')
+        except Exception as e:
+            print(f"Error starting trivia session: {e}")
+            await ctx.send(f"Error starting trivia session: {e}")
+            self.current_session_id = None
+
+    @commands.command(name='endgame')
+    async def end_game(self, ctx: Context):
+        """End the current trivia game."""
+        if self.current_session_id is None:
+            await ctx.send("No game is currently in progress.")
+            return
+
+        stop_time = datetime.datetime.now()
+        self.db.update_session_stop_time(self.current_session_id, stop_time)
+        await ctx.send(f'Trivia game ended! Session ID: {self.current_session_id}')
+        self.current_session_id = None
+
+    @commands.command(name='question')
+    async def ask_question(self, ctx: Context):
+        """Ask a trivia question with multiple-choice answers during an active game."""
+        if self.current_session_id is None:
+            await ctx.send("No trivia game is currently in progress. Use !startgame to begin.")
+            return
+
+        # Fetch a random question
+        question = self.db.get_random_question()
+        if not question:
+            await ctx.send('No questions available.')
+            return
+
+        # Fetch corresponding answers for the question
+        answers = self.db.get_answers_for_question(question[0])
+        if not answers:
+            await ctx.send('No answers available for this question.')
+            return
+
+        # Format the question and answers
+        question_text = f"Category: {question[2]}\nQuestion: {question[3]}"
+        answer_text = "\n".join([f"{answer[0].upper()}: {answer[2]}" for answer in answers])
+        full_text = f"{question_text}\n\n**Answers:**\n{answer_text}"
+
+        # Insert the asked question into the `asked` table
+        try:
+            self.db.insert_asked(
+                session_id=self.current_session_id,
+                question_id=question[0],
+                answered_by=ctx.author.id,
+                answer="",  # No answer yet
+                is_correct=False  # Not answered yet
+            )
+        except Exception as e:
+            await ctx.send(f"Error recording the asked question: {e}")
+            return
+
+        # Send the question and answers to the Discord channel
+        await ctx.send(full_text)
+
+        def check(msg):
+            return msg.author == ctx.author and msg.channel == ctx.channel
+
+        # Wait for the user's answer
+        try:
+            answer = await self.bot.wait_for('message', check=check, timeout=30)
+            correct_answers = [ans for ans in answers if ans[3]]  # Get correct answers
+            if any(ans[0].lower() == answer.content.lower() for ans in correct_answers):
+                await ctx.send("🎉 Correct!")
+                self.db.insert_play(ctx.author.id, self.current_session_id, 10)
+                # Update the `asked` table with the correct answer
+                self.db.update_asked(
+                    session_id=self.current_session_id,
+                    question_id=question[0],
+                    answered_by=ctx.author.id,
+                    answer=answer.content.lower(),
+                    is_correct=True
+                )
+            else:
+                await ctx.send("❌ Incorrect!")
+                # Update the `asked` table with the incorrect answer
+                self.db.update_asked(
+                    session_id=self.current_session_id,
+                    question_id=question[0],
+                    answered_by=ctx.author.id,
+                    answer=answer.content.lower(),
+                    is_correct=False
+                )
+        except TimeoutError:
+            await ctx.send("⏰ Time's up!")
+
+
+    @commands.command(name='leaderboard')
+    async def leaderboard(self, ctx: Context):
+        """Display the leaderboard."""
+        try:
+            users = self.db.get_top_users(limit=10)
+        except Exception as e:
+            await ctx.send(f"Error retrieving leaderboard: {e}")
+            return
+
+        if not users:
+            await ctx.send('No users found on the leaderboard.')
+            return
+
+        leaderboard_message = "🏆 **Leaderboard** 🏆\n"
+        for rank, user in enumerate(users, start=1):
+            leaderboard_message += f"{rank}. {user[1]} - {user[2]} points\n"
+
+        await ctx.send(leaderboard_message)
 
     # Message context menu command
     async def remove_spoilers(
@@ -259,5 +409,5 @@ class General(commands.Cog, name="general"):
         )
 
 
-async def setup(bot) -> None:
-    await bot.add_cog(General(bot))
+async def setup(bot, db) -> None:
+    await bot.add_cog(General(bot, db))

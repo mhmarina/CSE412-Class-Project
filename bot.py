@@ -4,6 +4,7 @@ import os
 import platform
 import random
 import sys
+import datetime
 # import aiosqlite
 import discord
 from discord.ext import commands, tasks
@@ -52,6 +53,18 @@ intents.presences = True
 """
 
 intents = discord.Intents.default()
+intents.message_content = True
+
+#Initialize the bot
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+#Initialize the database connection
+db = DBManager()
+db.connect_and_init()
+
+#Global variable for tracking current trivia session
+current_session_id = None
+
 
 """
 Uncomment this if you want to use prefix (normal) commands.
@@ -62,7 +75,6 @@ If you want to use prefix commands, make sure to also enable the intent below in
 # intents.message_content = True
 
 # Setup both of the loggers
-
 
 class LoggingFormatter(logging.Formatter):
     # Colors
@@ -148,13 +160,16 @@ class DiscordBot(commands.Bot):
             if file.endswith(".py"):
                 extension = file[:-3]
                 try:
-                    await self.load_extension(f"cogs.{extension}")
+                    if extension == "general":
+                        from cogs.general import setup as general_setup
+                        await general_setup(self, self.db_mgr)
+                        #await self.load_extension(f"cogs.{extension}", extras={"db": self.db_mgr})
+                    else:
+                        await self.load_extension(f"cogs.{extension}")
                     self.logger.info(f"Loaded extension '{extension}'")
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
-                    self.logger.error(
-                        f"Failed to load extension {extension}\n{exception}",
-                    )
+                    self.logger.error(f"Failed to load extension {extension}\n{exception}")
 
     @tasks.loop(minutes=1.0)
     async def status_task(self) -> None:
@@ -182,7 +197,8 @@ class DiscordBot(commands.Bot):
             f"Running on: {platform.system()} {platform.release()} ({os.name})",
         )
         self.logger.info("-------------------")
-        await self.init_db()
+        self.db_mgr.connect_and_init()
+        #await self.init_db()
         await self.load_cogs()
         self.status_task.start()
 
@@ -263,13 +279,49 @@ class DiscordBot(commands.Bot):
         elif isinstance(error, commands.MissingRequiredArgument):
             embed = discord.Embed(
                 title="Error!",
-                # We need to capitalize because the command arguments have no capital letter in the code and they are the first word in the error message.
+                #We need to capitalize because the command arguments have no capital letter in the code and they are the first word in the error message.
                 description=str(error).capitalize(),
                 color=0xE02B2B,
             )
             await context.send(embed=embed)
         else:
             raise error
+        
+    async def on_ready(self):
+        """
+        Event triggered when the bot is ready and connected to Discord.
+        """
+        self.logger.info(f"Bot is ready and logged in as {self.user.name}")
+        
+        #Find a specific channel to send the welcome message
+        channel_id = 1308913475707338844
+        channel = self.get_channel(channel_id)
+        
+        if channel:
+            try:
+                #Construct the welcome message
+                welcome_message = (
+                    "🎉   **Welcome to the Trivia Game!**   🎉\n\n"
+                    "Here are the commands you can use to get started:\n"
+                    "`!startgame` - Start a new trivia game session.\n"
+                    "`!question` - Ask a trivia question.\n"
+                    "`!endgame` - End the current trivia game session.\n"
+                    "`!leaderboard` - View the trivia leaderboard.\n"
+                    "`!help` - Display all availabe commands.\n\n"
+                    "To select an answer, simply type the letter and press enter\n\n"
+                    "🍀   Enjoy the game and good luck!   🍀"
+                )
+                await channel.send(welcome_message)
+            except Exception as e:
+                self.logger.error(f"Failed to send welcome message: {e}")
+        else:
+            self.logger.warning("Channel not found. Please check the channel ID.")
+
+#Handle bot disconnect
+@bot.event
+async def on_disconnect():
+    db.close()
+    print('Bot has disconnected and database connection closed.')
 
 
 load_dotenv()
