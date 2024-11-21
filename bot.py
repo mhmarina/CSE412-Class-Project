@@ -293,29 +293,26 @@ class DiscordBot(commands.Bot):
         """
         self.logger.info(f"Bot is ready and logged in as {self.user.name}")
         
-        #Find a specific channel to send the welcome message
-        channel_id = 1308913475707338844
-        channel = self.get_channel(channel_id)
+        welcome_message = (
+            "🎉    **Welcome to the Trivia Game!**    🎉\n\n"
+            "Here are the commands you can use to get started:\n"
+            "`!startgame` - Start a new trivia game session.\n"
+            "`!question` - Ask a trivia question.\n"
+            "`!endgame` - End the current trivia game session.\n"
+            "`!leaderboard` - View the trivia leaderboard.\n"
+            "`!help` - List all available commands.\n\n"
+            "To select an answer, simply type the letter and press enter.\n\n"
+            "🍀    Enjoy the game and good luck!    🍀"
+        )
         
-        if channel:
-            try:
-                #Construct the welcome message
-                welcome_message = (
-                    "🎉   **Welcome to the Trivia Game!**   🎉\n\n"
-                    "Here are the commands you can use to get started:\n"
-                    "`!startgame` - Start a new trivia game session.\n"
-                    "`!question` - Ask a trivia question.\n"
-                    "`!endgame` - End the current trivia game session.\n"
-                    "`!leaderboard` - View the trivia leaderboard.\n"
-                    "`!help` - Display all availabe commands.\n\n"
-                    "To select an answer, simply type the letter and press enter\n\n"
-                    "🍀   Enjoy the game and good luck!   🍀"
-                )
-                await channel.send(welcome_message)
-            except Exception as e:
-                self.logger.error(f"Failed to send welcome message: {e}")
-        else:
-            self.logger.warning("Channel not found. Please check the channel ID.")
+        for guild in self.guilds:  #Iterate through all the guilds the bot is in
+            for channel in guild.text_channels:  #Iterate through all text channels
+                if channel.permissions_for(guild.me).send_messages:  #Check if bot can send messages in the channel
+                    try:
+                        await channel.send(welcome_message)  #Send the startup message
+                        break  #Stop after sending in the first accessible channel in the guild
+                    except Exception as e:
+                        self.logger.error(f"Failed to send welcome message in {channel.name} of {guild.name}: {e}")
 
 #Handle bot disconnect
 @bot.event

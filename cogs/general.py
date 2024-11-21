@@ -49,17 +49,17 @@ class General(commands.Cog, name="general"):
             await ctx.send("A game is already in progress!")
             return
 
-         # Get user information
+         #Get user information
         user_id = ctx.author.id  # Discord user ID
         username = ctx.author.name  # Discord username
 
-        # Check if the user already exists in the database
+        #Check if the user already exists in the database
         try:
             self.db.cursor.execute("SELECT COUNT(*) FROM users WHERE u_userid = %s;", [user_id])
             user_exists = self.db.cursor.fetchone()[0]
 
             if not user_exists:
-                # If user does not exist, add them to the database
+                #If user does not exist, add them to the database
                 self.db.insert_user(user_id, username)
                 print(f"User {username} (ID: {user_id}) added to the database.")
             else:
@@ -70,7 +70,7 @@ class General(commands.Cog, name="general"):
             await ctx.send(f"Error adding user to the database: {e}")
             return
 
-        # Create a new trivia session
+        #Create a new trivia session
         self.current_session_id = int(datetime.datetime.now().timestamp())
         start_time = datetime.datetime.now()
 
@@ -101,24 +101,24 @@ class General(commands.Cog, name="general"):
             await ctx.send("No trivia game is currently in progress. Use !startgame to begin.")
             return
 
-        # Fetch a random question
+        #Fetch a random question
         question = self.db.get_random_question()
         if not question:
             await ctx.send('No questions available.')
             return
 
-        # Fetch corresponding answers for the question
+        #Fetch corresponding answers for the question
         answers = self.db.get_answers_for_question(question[0])
         if not answers:
             await ctx.send('No answers available for this question.')
             return
 
-        # Format the question and answers
+        #Format the question and answers
         question_text = f"Category: {question[2]}\nQuestion: {question[3]}"
         answer_text = "\n".join([f"{answer[0].upper()}: {answer[2]}" for answer in answers])
         full_text = f"{question_text}\n\n**Answers:**\n{answer_text}"
 
-        # Insert the asked question into the `asked` table
+        #Insert the asked question into the `asked` table
         try:
             self.db.insert_asked(
                 session_id=self.current_session_id,
@@ -131,20 +131,20 @@ class General(commands.Cog, name="general"):
             await ctx.send(f"Error recording the asked question: {e}")
             return
 
-        # Send the question and answers to the Discord channel
+        #Send the question and answers to the Discord channel
         await ctx.send(full_text)
 
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
-        # Wait for the user's answer
+        #Wait for the user's answer
         try:
             answer = await self.bot.wait_for('message', check=check, timeout=30)
             correct_answers = [ans for ans in answers if ans[3]]  # Get correct answers
             if any(ans[0].lower() == answer.content.lower() for ans in correct_answers):
                 await ctx.send("🎉 Correct!")
                 self.db.insert_play(ctx.author.id, self.current_session_id, 10)
-                # Update the `asked` table with the correct answer
+                #Update the `asked` table with the correct answer
                 self.db.update_asked(
                     session_id=self.current_session_id,
                     question_id=question[0],
@@ -154,7 +154,7 @@ class General(commands.Cog, name="general"):
                 )
             else:
                 await ctx.send("❌ Incorrect!")
-                # Update the `asked` table with the incorrect answer
+                #Update the `asked` table with the incorrect answer
                 self.db.update_asked(
                     session_id=self.current_session_id,
                     question_id=question[0],
