@@ -1,18 +1,18 @@
 CREATE TABLE IF NOT EXISTS Users (
-    u_userid INTEGER PRIMARY KEY,
+    u_userid BIGINT PRIMARY KEY,
     u_totalScore INTEGER,
     u_username VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS TriviaSession (
-	t_sessionid INTEGER PRIMARY KEY,
+	t_sessionid BIGINT PRIMARY KEY,
 	t_startTime TIMESTAMP,
 	t_stopTime TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS Plays (
-	p_userid INTEGER,
-	p_sessionId INTEGER,
+	p_userid BIGINT,
+	p_sessionId BIGINT,
 	p_score INTEGER,
 	PRIMARY KEY (p_userid, p_sessionId),
 	FOREIGN KEY (p_userid) REFERENCES Users(u_userid) ON DELETE CASCADE,
@@ -35,9 +35,9 @@ a_isCorrect BOOLEAN,
 	FOREIGN KEY (a_questionid) REFERENCES Questions(q_questionid)ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS Asked (
-	as_sessionid INTEGER,
+	as_sessionid BIGINT,
 	as_questionid INTEGER,
-	as_answeredby INTEGER,
+	as_answeredby BIGINT,
 	as_answer CHAR(1),
 	as_iscorrect BOOLEAN,
 	PRIMARY KEY (as_sessionid, as_questionid, as_answeredby),
