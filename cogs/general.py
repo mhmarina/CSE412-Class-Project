@@ -62,13 +62,17 @@ class General(commands.Cog, name="general"):
             print(f"Error checking/adding user: {e}")
             await ctx.send(f"Error adding user to the database: {e}")
             return 1
+        
+    @commands.command(name='categories')
+    async def print_categories(self, ctx: Context):
+        categories = self.db.select_distinct_categories()
+        categoriesString = ""
+        for category in categories:
+            categoriesString += category[0] + "\n"
 
+        await ctx.send("There are questions in the following categories: \n" + categoriesString)
+        return
 
-    # @commands.command(name='sessionhistory')
-    # async def session_history(self, ctx: Context, session_id):
-    #     try:
-    #         self.db
-    
     @commands.command(name='startgame')
     async def start_game(self, ctx: Context):
         """Start a new trivia game."""
@@ -104,7 +108,7 @@ class General(commands.Cog, name="general"):
         stop_time = datetime.datetime.now()
         self.db.update_session_stop_time(self.current_session_id, stop_time)
         await ctx.send(f'Trivia game ended! Session ID: {self.current_session_id}')
-        self.current_session_id = None
+        self.current_session_id = None                
 
     @commands.command(name='question')
     async def ask_question(self, ctx: Context):

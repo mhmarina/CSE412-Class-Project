@@ -52,6 +52,7 @@ class DBManager:
                 conn.commit()
             else:
                 print("Questions (and answers) table already populated")
+
             # test
             cursor.execute("SELECT * FROM Questions")
             questions = cursor.fetchall()
@@ -91,6 +92,27 @@ class DBManager:
         except Exception as e:
             self.conn.rollback()
             print(f"Error inserting trivia session: {e}")
+
+    # selects a random question given a category
+    def get_question_cat(self, category):
+        try:
+            self.cursor.execute(f'''
+                SELECT q_questionid, q_hint, q_category, q_questiontext
+                FROM questions
+                WHERE q_category = %s
+                ORDER BY RANDOM()
+                LIMIT 1
+            ''', [category])
+            question = self.cursor.fetchone()
+            if(question):
+                return question
+            else:
+                print(f"No questions in category {category} available in databased")
+                return 2
+        except Exception as e:
+            print(f"Error fetching random question in category {category}: {e}")
+            return None
+
 
     def get_random_question(self):
         """
@@ -202,20 +224,6 @@ class DBManager:
         except Exception as e:
             self.conn.rollback()
             print(f"Error inserting user: {e}")
-
-    def get_answers_for_question(self, question_id):
-        """Fetch multiple-choice answers for a given question."""
-        try:
-            self.cursor.execute('''
-                SELECT a_answerid, a_questionid, a_answertext, a_iscorrect
-                FROM answers
-                WHERE a_questionid = %s
-                ORDER BY a_answerid
-            ''', [question_id])
-            return self.cursor.fetchall()
-        except Exception as e:
-            print(f"Error fetching answers for question {question_id}: {e}")
-            return []
         
     def update_asked(self, session_id, question_id, answered_by, answer, is_correct):
         """Update an entry in the 'asked' table after the user answers the question."""
@@ -285,21 +293,32 @@ class DBManager:
         ''', [u_userid])
         self.conn.commit()
 
+    def select_distinct_categories(self):
+        self.cursor.execute('''
+        SELECT DISTINCT q_category FROM questions
+        ''')
+        return self.cursor.fetchall()
+
 # test:
 def main():
     db = DBManager()
     db.connect_and_init()
-    db.insert_user("1020192", "marina239")
-    print(db.select_top_players())
-    db.update_user_score("1020192")
-    db.update_user_score("1020192")
-    db.update_user_score("1020192")
-    db.insert_user("29", "pizzakdj")
-    print(db.select_top_players())
-    db.delete_user("1020192")
-    print(db.select_top_players())
-    db.insert_user("1020192", "marina239")
-    print(db.select_top_players())
+    # db.insert_user("1020192", "marina239")
+    # print(db.select_top_players())
+    # db.update_user_score("1020192")
+    # db.update_user_score("1020192")
+    # db.update_user_score("1020192")
+    # db.insert_user("29", "pizzakdj")
+    # print(db.select_top_players())
+    # db.delete_user("1020192")
+    # print(db.select_top_players())
+    # db.insert_user("1020192", "marina239")
+    # print(db.select_top_players())
+    categories = db.select_distinct_categories()
+    for category in categories:
+        print(category[0])
+    geography = "Geography"
+    print(db.get_question_cat(geography))
 
 if __name__ == "__main__":
     main()

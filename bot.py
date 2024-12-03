@@ -300,6 +300,7 @@ class DiscordBot(commands.Bot):
             "`!question` - Ask a trivia question.\n"
             "`!endgame` - End the current trivia game session.\n"
             "`!leaderboard` - View the trivia leaderboard.\n"
+            "`!categories` - View all Categories.\n"
             "`!help` - List all available commands.\n\n"
             "To select an answer, simply type the letter and press enter.\n\n"
             "🍀    Enjoy the game and good luck!    🍀"
