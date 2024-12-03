@@ -134,7 +134,7 @@ class General(commands.Cog, name="general"):
         await ctx.send(full_text)
 
         def check(msg):
-            return msg.author == ctx.author and msg.channel == ctx.channel
+            return msg.channel == ctx.channel
 
         #Wait for the user's answer
         try:
@@ -158,7 +158,7 @@ class General(commands.Cog, name="general"):
                 )
             else:
                 await ctx.send("❌ Incorrect!")
-                self.db.insert_play(ctx.author.id, self.current_session_id, 0)
+                self.db.insert_play(ctx.author.id, self.current_session_id, 10)
                 #Update the `asked` table with the incorrect answer
                 self.db.insert_asked(
                     session_id=self.current_session_id,

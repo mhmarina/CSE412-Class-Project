@@ -1,12 +1,10 @@
-[2024-12-02 18:00:37] [INFO    ] discord_bot: Logged in as CSE412
-[2024-12-02 18:00:37] [INFO    ] discord_bot: discord.py API version: 2.4.0
-[2024-12-02 18:00:37] [INFO    ] discord_bot: Python version: 3.12.4
-[2024-12-02 18:00:37] [INFO    ] discord_bot: Running on: Windows 11 (nt)
-[2024-12-02 18:00:37] [INFO    ] discord_bot: -------------------
-[2024-12-02 18:00:37] [INFO    ] discord_bot: Loaded extension 'general'
-[2024-12-02 18:00:39] [INFO    ] discord_bot: Bot is ready and logged in as CSE412
-[2024-12-02 18:00:42] [INFO    ] discord_bot: Executed startgame command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
-[2024-12-02 18:00:45] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
-[2024-12-02 18:00:48] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
-[2024-12-02 18:00:52] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
-[2024-12-02 18:01:15] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
+[2024-12-02 18:14:50] [INFO    ] discord_bot: Logged in as CSE412
+[2024-12-02 18:14:50] [INFO    ] discord_bot: discord.py API version: 2.4.0
+[2024-12-02 18:14:50] [INFO    ] discord_bot: Python version: 3.12.4
+[2024-12-02 18:14:50] [INFO    ] discord_bot: Running on: Windows 11 (nt)
+[2024-12-02 18:14:50] [INFO    ] discord_bot: -------------------
+[2024-12-02 18:14:50] [INFO    ] discord_bot: Loaded extension 'general'
+[2024-12-02 18:14:52] [INFO    ] discord_bot: Bot is ready and logged in as CSE412
+[2024-12-02 18:14:58] [INFO    ] discord_bot: Executed startgame command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
+[2024-12-02 18:15:18] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by pizzakingdom (ID: 1009979000841584752)
+[2024-12-02 18:16:41] [INFO    ] discord_bot: Executed question command in cse412-test-marina (ID: 1309272453314379846) by jakec480 (ID: 892230852598186024)
