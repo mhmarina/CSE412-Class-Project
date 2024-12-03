@@ -42,18 +42,10 @@ class General(commands.Cog, name="general"):
         """A simple test command."""
         await ctx.send("The bot is working!")
 
-    @commands.command(name='startgame')
-    async def start_game(self, ctx: Context):
-        """Start a new trivia game."""
-        if self.current_session_id is not None:
-            await ctx.send("A game is already in progress!")
-            return
-
-         #Get user information
+    # insert user if DNE
+    async def insert_user(self, ctx):
         user_id = ctx.author.id  # Discord user ID
         username = ctx.author.name  # Discord username
-
-        #Check if the user already exists in the database
         try:
             self.db.cursor.execute("SELECT COUNT(*) FROM users WHERE u_userid = %s;", [user_id])
             user_exists = self.db.cursor.fetchone()[0]
@@ -64,10 +56,29 @@ class General(commands.Cog, name="general"):
                 print(f"User {username} (ID: {user_id}) added to the database.")
             else:
                 print(f"User {username} (ID: {user_id}) already exists in the database.")
+            return 0
 
         except Exception as e:
             print(f"Error checking/adding user: {e}")
             await ctx.send(f"Error adding user to the database: {e}")
+            return 1
+
+
+    # @commands.command(name='sessionhistory')
+    # async def session_history(self, ctx: Context, session_id):
+    #     try:
+    #         self.db
+    
+    @commands.command(name='startgame')
+    async def start_game(self, ctx: Context):
+        """Start a new trivia game."""
+        if self.current_session_id is not None:
+            await ctx.send("A game is already in progress!")
+            return
+
+         #add user to DB if DNE
+        error = await self.insert_user(ctx)
+        if error == 1:
             return
 
         #Create a new trivia session
@@ -81,6 +92,7 @@ class General(commands.Cog, name="general"):
             print(f"Error starting trivia session: {e}")
             await ctx.send(f"Error starting trivia session: {e}")
             self.current_session_id = None
+
 
     @commands.command(name='endgame')
     async def end_game(self, ctx: Context):
@@ -118,19 +130,6 @@ class General(commands.Cog, name="general"):
         answer_text = "\n".join([f"{answer[0].upper()}: {answer[2]}" for answer in answers])
         full_text = f"{question_text}\n\n**Answers:**\n{answer_text}"
 
-        #Insert the asked question into the `asked` table
-        try:
-            self.db.insert_asked(
-                session_id=self.current_session_id,
-                question_id=question[0],
-                answered_by=ctx.author.id,
-                answer="",  # No answer yet
-                is_correct=False  # Not answered yet
-            )
-        except Exception as e:
-            await ctx.send(f"Error recording the asked question: {e}")
-            return
-
         #Send the question and answers to the Discord channel
         await ctx.send(full_text)
 
@@ -140,12 +139,17 @@ class General(commands.Cog, name="general"):
         #Wait for the user's answer
         try:
             answer = await self.bot.wait_for('message', check=check, timeout=30)
+            # add user to db if doesn't exist:
+            error = await self.insert_user(ctx)
+            if error == 1:
+                return
+
             correct_answers = [ans for ans in answers if ans[3]]  # Get correct answers
             if any(ans[0].lower() == answer.content.lower() for ans in correct_answers):
                 await ctx.send("🎉 Correct!")
                 self.db.insert_play(ctx.author.id, self.current_session_id, 10)
                 #Update the `asked` table with the correct answer
-                self.db.update_asked(
+                self.db.insert_asked(
                     session_id=self.current_session_id,
                     question_id=question[0],
                     answered_by=ctx.author.id,
@@ -154,8 +158,9 @@ class General(commands.Cog, name="general"):
                 )
             else:
                 await ctx.send("❌ Incorrect!")
+                self.db.insert_play(ctx.author.id, self.current_session_id, 0)
                 #Update the `asked` table with the incorrect answer
-                self.db.update_asked(
+                self.db.insert_asked(
                     session_id=self.current_session_id,
                     question_id=question[0],
                     answered_by=ctx.author.id,

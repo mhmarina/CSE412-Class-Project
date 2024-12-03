@@ -118,28 +118,8 @@ class DBManager:
 
     def insert_asked(self, session_id, question_id, answered_by, answer, is_correct):
         try:
-            # Step 1: Ensure the user exists in the `Users` table
-            self.cursor.execute(
-                '''
-                SELECT COUNT(*) FROM users WHERE u_userid = %s;
-                ''',
-                [answered_by]
-            )
-            user_exists = self.cursor.fetchone()[0]
-
-            if not user_exists:
-                # If the user does not exist, insert the user with default values
-                self.cursor.execute(
-                    '''
-                    INSERT INTO users (u_userid, u_totalScore, u_username) 
-                    VALUES (%s, %s, %s);
-                    ''',
-                    [answered_by, 0, f"User_{answered_by}"]  # Default username
-                )
-                self.conn.commit()
-                print(f"Inserted new user: {answered_by}")
-
             # Step 2: Insert the `asked` entry
+            print(f"session {session_id}, question {question_id}, answered by {answered_by}")
             self.cursor.execute(
                 '''
                 INSERT INTO asked (as_sessionid, as_questionid, as_answeredby, as_answer, as_iscorrect) 
@@ -152,7 +132,7 @@ class DBManager:
 
         except Exception as e:
             self.conn.rollback()
-            print(f"Error inserting/updating asked entry: {e}")
+            print(f"Error inserting asked entry: {e}")
 
     def get_answers_for_question(self, question_id):
         """
@@ -169,42 +149,7 @@ class DBManager:
             print(f"Error fetching answers for question {question_id}: {e}")
             return None
         
-    def insert_asked(self, session_id, question_id, answered_by, answer, is_correct):
-        """
-        Insert or update an entry in the asked table.
-        """
-        try:
-            # Check if the question was already inserted
-            self.cursor.execute('''
-                SELECT 1 
-                FROM asked 
-                WHERE as_sessionid = %s AND as_questionid = %s AND as_answeredby = %s;
-            ''', (session_id, question_id, answered_by))
-            exists = self.cursor.fetchone()
-
-            if exists:
-                # Update the record if it already exists
-                self.cursor.execute('''
-                    UPDATE asked
-                    SET as_answer = %s, as_iscorrect = %s
-                    WHERE as_sessionid = %s AND as_questionid = %s AND as_answeredby = %s;
-                ''', (answer, is_correct, session_id, question_id, answered_by))
-            else:
-                # Insert a new record
-                self.cursor.execute('''
-                    INSERT INTO asked (as_sessionid, as_questionid, as_answeredby, as_answer, as_iscorrect)
-                    VALUES (%s, %s, %s, %s, %s);
-                ''', (session_id, question_id, answered_by, answer, is_correct))
-            
-            self.conn.commit()
-        except Exception as e:
-            self.conn.rollback()
-            print(f"Error inserting/updating asked entry: {e}")
-
     def insert_play(self, user_id, session_id, points):
-        """
-        Update the user's score in the Users table for a given session.
-        """
         try:
             # Update the user's total score
             self.cursor.execute('''
@@ -212,8 +157,36 @@ class DBManager:
                 SET u_totalScore = u_totalScore + %s
                 WHERE u_userid = %s;
             ''', (points, user_id))
-            
             self.conn.commit()
+            print(f"succesffully updated total score for user {user_id}")
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Called insert_play(). Error updating total score: {e}")
+
+        # update user score for this session:
+        try:
+            self.cursor.execute('''
+                SELECT 1 FROM Plays
+                WHERE p_sessionid = %s AND p_userid = %s
+            ''', (session_id, user_id))
+            exists = self.cursor.fetchone()
+            if not exists:
+                self.cursor.execute('''
+                INSERT INTO Plays (p_userid, p_sessionid, p_score)
+                VALUES(%s, %s, %s)
+                ''', (user_id, session_id, points))
+                self.conn.commit()
+                print(f"Successfully inserted play for user {user_id} in session {session_id}.")
+            else:
+                self.cursor.execute('''
+                UPDATE Plays 
+                SET p_score = p_score + %s
+                WHERE p_userid = %s
+                AND p_sessionid = %s
+                ''', (points, user_id, session_id))
+                self.conn.commit()
+                print(f"Successfully updated play for user {user_id} in session {session_id}.")
+
         except Exception as e:
             self.conn.rollback()
             print(f"Error updating play: {e}")
