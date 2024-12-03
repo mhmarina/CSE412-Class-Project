@@ -111,17 +111,25 @@ class General(commands.Cog, name="general"):
         self.current_session_id = None                
 
     @commands.command(name='question')
-    async def ask_question(self, ctx: Context):
+    async def ask_question(self, ctx: Context, category=None):
         """Ask a trivia question with multiple-choice answers during an active game."""
         if self.current_session_id is None:
             await ctx.send("No trivia game is currently in progress. Use !startgame to begin.")
             return
 
         #Fetch a random question
-        question = self.db.get_random_question()
-        if not question:
-            await ctx.send('No questions available.')
-            return
+        question = None
+        if(category):
+            question = self.db.get_question_cat(category)
+            if not question:
+                await ctx.send(f'No questions found under category: "{category}".\n')
+                await self.print_categories(ctx)
+                return
+        else:
+            question = self.db.get_random_question()
+            if not question:
+                await ctx.send('No questions available.')
+                return
 
         #Fetch corresponding answers for the question
         answers = self.db.get_answers_for_question(question[0])
@@ -138,7 +146,7 @@ class General(commands.Cog, name="general"):
         await ctx.send(full_text)
 
         def check(msg):
-            return msg.channel == ctx.channel
+            return msg.author != self.bot.user and msg.channel == ctx.channel
 
         #Wait for the user's answer
         try:

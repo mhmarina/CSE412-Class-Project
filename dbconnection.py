@@ -108,7 +108,7 @@ class DBManager:
                 return question
             else:
                 print(f"No questions in category {category} available in databased")
-                return 2
+                return None
         except Exception as e:
             print(f"Error fetching random question in category {category}: {e}")
             return None
