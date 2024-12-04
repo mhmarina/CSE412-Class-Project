@@ -1,21 +1,4 @@
-# Python Discord Bot Template
-
-This repository is a template that everyone can use for the start of their Discord bot.
-
-Slash commands can take some time to get registered globally, so if you want to test a command you should use
-the `@app_commands.guilds()` decorator so that it gets registered instantly. Example:
-
-```py
-@commands.hybrid_command(
-  name="command",
-  description="Command description",
-)
-@app_commands.guilds(discord.Object(id=GUILD_ID)) # Place guild ID here
-```
-
 ## How to set up
-
-To set up the bot it was made as simple as possible.
 
 ### `config.json` file
 
@@ -27,13 +10,14 @@ Here is an explanation of what everything is:
 | Variable             | What it is                                     |
 | -------------------- | ---------------------------------------------- |
 | BOT_PREFIX_HERE      | The prefix you want to use for normal commands |
-| BOT_INVITE_LINK_HERE | The link to invite the bot                     |
+| BOT_INVITE_LINK_HERE | The link to invite the bot                     | 
 
 ### `.env` file
-
-To set up the token you will have to make use of the [`.env.example`](.env.example) file, you should rename it to `.env` and replace `BOT_TOKEN_HERE` with actual bot's token.
-
-Alternatively you can simply create an environment variable named `TOKEN`.
+Set up the following env variables: <br>
+`TOKEN` - This is the Bot token <br>
+`DBNAME` - This is the Database name <br>
+`DBUSER` - This is the Databse user (for example, "postgres") <br>
+`DBPASS` - This is the Database password 
 
 ## How to start
 
@@ -52,5 +36,8 @@ After that you can start it with
 ```
 python bot.py
 ```
-
+## Further reading
+<link>https://www.writebots.com/discord-bot-token/<link>
+<br>
+<br>
 > **Note:** May need to replace `python` with `py`, `python3`, `python3.11`, etc. depending on what Python versions you have installed on the machine.
