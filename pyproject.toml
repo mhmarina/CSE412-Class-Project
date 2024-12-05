@@ -12,6 +12,7 @@ aiohttp = "^3.10.10"
 aiosqlite = "^0.20.0"
 "discord.py" = "^2.4.0"
 python-dotenv = "^1.0.1"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

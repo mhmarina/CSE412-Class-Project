@@ -10,14 +10,14 @@ Here is an explanation of what everything is:
 | Variable             | What it is                                     |
 | -------------------- | ---------------------------------------------- |
 | BOT_PREFIX_HERE      | The prefix you want to use for normal commands |
-| BOT_INVITE_LINK_HERE | The link to invite the bot                     | 
+| BOT_INVITE_LINK_HERE | The link to invite the bot                     |
 
 ### `.env` file
 Set up the following env variables: <br>
 `TOKEN` - This is the Bot token <br>
 `DBNAME` - This is the Database name <br>
 `DBUSER` - This is the Databse user (for example, "postgres") <br>
-`DBPASS` - This is the Database password 
+`DBPASS` - This is the Database password
 
 ## How to start
 
