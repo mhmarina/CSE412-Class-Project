@@ -309,7 +309,7 @@ class General(commands.Cog, name="general"):
         :param context: The hybrid command context.
         """
         embed = Embed(
-            description="Used [Krypton's](https://krypton.ninja) template",
+            description="Made by Group 42",
             color=0xBEBEFE,
         )
         embed.set_author(name="Bot Information")

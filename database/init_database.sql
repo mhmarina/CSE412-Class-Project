@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS Asked (
     FOREIGN KEY (as_answeredby) REFERENCES Users(u_userid)
 );
 
--- Insert questions from CSV into the Questions table
+-- Insert questions into the Questions table
 INSERT INTO Questions (q_questionid, q_hint, q_category, q_questiontext) VALUES
 (1, NULL, 'History', 'Which era marked a switch from agricultural practices to industrial practices?'),
 (2, NULL, 'Geography', 'What United States city is known as "The City of Fountains?"'),
@@ -59,7 +59,7 @@ INSERT INTO Questions (q_questionid, q_hint, q_category, q_questiontext) VALUES
 (13, NULL, 'Nature', 'How much does a blue whale tongue weigh?'),
 (14, NULL, 'Nature', 'What bird has the longest migration?'),
 (15, NULL, 'Nature', 'What color is polar bear skin?'),
-(16, NULL, 'History', 'What country has the worlds oldest parliament?'),
+(16, NULL, 'History', 'What country has the world''s oldest parliament?'),
 (17, NULL, 'History', 'What was the length of the shortest war in history?'),
 (18, NULL, 'History', 'How many giant head statues are on Easter Island?'),
 (19, NULL, 'History', 'How many people died of bubonic plague during the Middle Ages?'),
@@ -105,9 +105,7 @@ INSERT INTO Questions (q_questionid, q_hint, q_category, q_questiontext) VALUES
 (59, NULL, 'Nature', 'What color is hippopotamus milk?'),
 (60, NULL, 'Nature', 'What animal has the largest eyes in the world?');
 
-
-
--- Insert answers from CSV into the Answers table
+-- Insert answers into the Answers table
 INSERT INTO Answers (a_answerid, a_questionid, a_answertext, a_isCorrect) VALUES
 ('a', 1, 'Middle Ages', FALSE),
 ('b', 1, 'The Industrial Revolution', TRUE),

@@ -18,19 +18,25 @@ class DBManager:
             print("Connected!")
             self.cursor = self.conn.cursor()
 
-            # Execute the combined SQL file
-            init_file = "database/init_database.sql"
-            with open(init_file, "r") as f:
-                self.cursor.execute(f.read())
-            self.conn.commit()
-            print("Schema and data initialized!")
-
+            # Check if initialization is needed
+            self.cursor.execute("SELECT to_regclass('public.Users');")
+            result = self.cursor.fetchone()
+            if result[0] is None:
+                # Tables don't exist, initialize the database
+                init_file = "database/init_database.sql"
+                with open(init_file, "r") as f:
+                    sql = f.read()
+                self.cursor.execute(sql)
+                self.conn.commit()
+                print("Schema and data initialized!")
+            else:
+                print("Database already initialized.")
         except Error as e:
             print(f"Database error: {e}")
-            self.close_connection()
+            # Don't close the connection here; let the bot continue running
         except Exception as e:
             print(f"Error: {e}")
-            self.close_connection()
+            # Don't close the connection here; let the bot continue running
 
     def close_connection(self):
         if self.conn:

@@ -4,25 +4,26 @@ services:
   bot:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
-    volumes:
-      - .:/app
+    environment:
+      - DB_HOST=db  # Add this line
     restart: unless-stopped
 
   db:
     image: postgres:latest
-    environment:
-      - POSTGRES_DB=db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=xocPen-zijfe5-wydgor
+    env_file:
+      - .env
     volumes:
-      - ./database/init:/docker-entrypoint-initdb.d
-      - ./database/data:/data
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
