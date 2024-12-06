@@ -5,25 +5,21 @@ services:
     build: .
     depends_on:
       - db
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER} 
-      - DB_PASS=${DB_PASS}
-      - DB_HOST=db
+    env_file:
+      - .env
     volumes:
       - .:/app
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:latest
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=xocPen-zijfe5-wydgor
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/data:/data
     ports:
       - "5432:5432"
     restart: unless-stopped

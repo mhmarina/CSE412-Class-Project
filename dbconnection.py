@@ -1,9 +1,9 @@
-from csv import reader_csv
+from csv import reader as reader_csv
 from datetime import datetime
 from os import getenv
-
+import os
+import csv
 from psycopg2 import Error, connect
-
 
 class DBManager:
     def __init__(self):
@@ -11,67 +11,26 @@ class DBManager:
         self.cursor = None
 
     def connect_and_init(self):
-        conn_string = f"host='localhost' dbname='{getenv('DB_NAME')}' user='{getenv('DB_USER')}' password='{getenv('DB_PASS')}'"
+        conn_string = f"host={getenv('DB_HOST')} dbname='{getenv('DB_NAME')}' user='{getenv('DB_USER')}' password='{getenv('DB_PASS')}'"
         print(f"Connecting to database...\n {conn_string}")
-        conn = None
         try:
-            conn = connect(conn_string)
+            self.conn = connect(conn_string)
             print("Connected!")
-            # use cursor obj to perform queries
-            cursor = conn.cursor()
-            # create tables if they do not exist
-            # read CREATE queries from schema.sql
-            cursor.execute(open("database/schema.sql").read())
-            conn.commit()
-            # check if questions table exists
-            cursor.execute(
-                """
-                            SELECT COUNT(1) WHERE EXISTS (SELECT * FROM Questions)
-                                """,
-            )
-            questions_exist = cursor.fetchone()[0]
-            # populate questions and answers
-            if not questions_exist:
-                with open("database/Questions.csv") as f:
-                    reader = reader_csv(f)
-                    next(reader)
-                    for row in reader:
-                        cursor.execute(
-                            """
-                            INSERT INTO Questions VALUES (%s, %s, %s, %s)
-                        """,
-                            row,
-                        )
-                conn.commit()
-                with open("database/Answers.csv") as f:
-                    reader = reader_csv(f)
-                    next(reader)  # Skip the header row.
-                    for row in reader:
-                        cursor.execute(
-                            """
-                            INSERT INTO Answers VALUES (%s, %s, %s, %s)
-                        """,
-                            row,
-                        )
-                conn.commit()
-            else:
-                print("Questions (and answers) table already populated")
+            self.cursor = self.conn.cursor()
 
-            # test
-            cursor.execute("SELECT * FROM Questions")
-            questions = cursor.fetchall()
-            for question in questions:
-                print(question)
-
-            self.conn = conn
-            self.cursor = cursor
+            # Execute the combined SQL file
+            init_file = "database/init_database.sql"
+            with open(init_file, "r") as f:
+                self.cursor.execute(f.read())
+            self.conn.commit()
+            print("Schema and data initialized!")
 
         except Error as e:
-            self.close_connection()
             print(f"Database error: {e}")
-        except Exception as e:
             self.close_connection()
-            print(e)
+        except Exception as e:
+            print(f"Error: {e}")
+            self.close_connection()
 
     def close_connection(self):
         if self.conn:
@@ -356,11 +315,30 @@ class DBManager:
         )
         return self.cursor.fetchall()
 
+    def load_data_from_csv(self):
+        data_dir = "database/data/"
+        try:
+            for filename in os.listdir(data_dir):
+                if filename.endswith(".csv"):
+                    table_name = filename.split(".")[0]
+                    with open(os.path.join(data_dir, filename), "r") as f:
+                        reader = csv.reader(f)
+                        headers = next(reader)
+                        query = f"INSERT INTO {table_name} ({', '.join(headers)}) VALUES ({', '.join(['%s'] * len(headers))})"
+                        for row in reader:
+                            self.cursor.execute(query, row)
+            self.conn.commit()
+            print("Data loaded from CSV files!")
+        except Exception as e:
+            print(f"Error loading data from CSV files: {e}")
+            self.conn.rollback()
+
 
 # test:
 def main():
     db = DBManager()
     db.connect_and_init()
+    db.load_data_from_csv()
     # db.insert_user("1020192", "marina239")
     # print(db.select_top_players())
     # db.update_user_score("1020192")
@@ -372,11 +350,11 @@ def main():
     # print(db.select_top_players())
     # db.insert_user("1020192", "marina239")
     # print(db.select_top_players())
-    categories = db.select_distinct_categories()
-    for category in categories:
-        print(category[0])
-    geography = "Geography"
-    print(db.get_question_cat(geography))
+    # categories = db.select_distinct_categories()
+    # for category in categories:
+    #     print(category[0])
+    # geography = "Geography"
+    # print(db.get_question_cat(geography))
 
 
 if __name__ == "__main__":
