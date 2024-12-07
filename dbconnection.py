@@ -1,9 +1,8 @@
-from csv import reader as reader_csv
 from datetime import datetime
 from os import getenv
-import os
-import csv
+
 from psycopg2 import Error, connect
+
 
 class DBManager:
     def __init__(self):
@@ -24,7 +23,7 @@ class DBManager:
             if result[0] is None:
                 # Tables don't exist, initialize the database
                 init_file = "database/init_database.sql"
-                with open(init_file, "r") as f:
+                with open(init_file) as f:
                     sql = f.read()
                 self.cursor.execute(sql)
                 self.conn.commit()
@@ -321,46 +320,11 @@ class DBManager:
         )
         return self.cursor.fetchall()
 
-    def load_data_from_csv(self):
-        data_dir = "database/data/"
-        try:
-            for filename in os.listdir(data_dir):
-                if filename.endswith(".csv"):
-                    table_name = filename.split(".")[0]
-                    with open(os.path.join(data_dir, filename), "r") as f:
-                        reader = csv.reader(f)
-                        headers = next(reader)
-                        query = f"INSERT INTO {table_name} ({', '.join(headers)}) VALUES ({', '.join(['%s'] * len(headers))})"
-                        for row in reader:
-                            self.cursor.execute(query, row)
-            self.conn.commit()
-            print("Data loaded from CSV files!")
-        except Exception as e:
-            print(f"Error loading data from CSV files: {e}")
-            self.conn.rollback()
-
 
 # test:
 def main():
     db = DBManager()
     db.connect_and_init()
-    db.load_data_from_csv()
-    # db.insert_user("1020192", "marina239")
-    # print(db.select_top_players())
-    # db.update_user_score("1020192")
-    # db.update_user_score("1020192")
-    # db.update_user_score("1020192")
-    # db.insert_user("29", "pizzakdj")
-    # print(db.select_top_players())
-    # db.delete_user("1020192")
-    # print(db.select_top_players())
-    # db.insert_user("1020192", "marina239")
-    # print(db.select_top_players())
-    # categories = db.select_distinct_categories()
-    # for category in categories:
-    #     print(category[0])
-    # geography = "Geography"
-    # print(db.get_question_cat(geography))
 
 
 if __name__ == "__main__":

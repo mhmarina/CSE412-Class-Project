@@ -1,9 +1,19 @@
-import json
-import logging
-import os
-import platform
-import random
-import sys
+from json import load as load_json
+from logging import (
+    CRITICAL,
+    DEBUG,
+    ERROR,
+    INFO,
+    WARNING,
+    FileHandler,
+    Formatter,
+    StreamHandler,
+    getLogger,
+)
+from os import getenv, listdir, name, path
+from platform import python_version, release, system
+from random import choice as rchoice
+from sys import exit as sys_exit
 
 from discord import Embed, Game, Intents, Message, __version__
 from discord.ext import commands, tasks
@@ -12,11 +22,11 @@ from dotenv import load_dotenv
 
 from dbconnection import DBManager
 
-if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
-    sys.exit("'config.json' not found! Please add it and try again.")
+if not path.isfile(f"{path.realpath(path.dirname(__file__))}/config.json"):
+    sys_exit("'config.json' not found! Please add it and try again.")
 else:
-    with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
-        config = json.load(file)
+    with open(f"{path.realpath(path.dirname(__file__))}/config.json") as file:
+        config = load_json(file)
 
 """
 Setup bot intents (events restrictions)
@@ -79,7 +89,7 @@ If you want to use prefix commands, make sure to also enable the intent below in
 # Setup both of the loggers
 
 
-class LoggingFormatter(logging.Formatter):
+class LoggingFormatter(Formatter):
     # Colors
     black = "\x1b[30m"
     red = "\x1b[31m"
@@ -92,11 +102,11 @@ class LoggingFormatter(logging.Formatter):
     bold = "\x1b[1m"
 
     COLORS = {
-        logging.DEBUG: gray + bold,
-        logging.INFO: blue + bold,
-        logging.WARNING: yellow + bold,
-        logging.ERROR: red,
-        logging.CRITICAL: red + bold,
+        DEBUG: gray + bold,
+        INFO: blue + bold,
+        WARNING: yellow + bold,
+        ERROR: red,
+        CRITICAL: red + bold,
     }
 
     def format(self, record):
@@ -106,19 +116,19 @@ class LoggingFormatter(logging.Formatter):
         format = format.replace("(reset)", self.reset)
         format = format.replace("(levelcolor)", log_color)
         format = format.replace("(green)", self.green + self.bold)
-        formatter = logging.Formatter(format, "%Y-%m-%d %H:%M:%S", style="{")
+        formatter = Formatter(format, "%Y-%m-%d %H:%M:%S", style="{")
         return formatter.format(record)
 
 
-logger = logging.getLogger("discord_bot")
-logger.setLevel(logging.INFO)
+logger = getLogger("discord_bot")
+logger.setLevel(INFO)
 
 # Console handler
-console_handler = logging.StreamHandler()
+console_handler = StreamHandler()
 console_handler.setFormatter(LoggingFormatter())
 # File handler
-file_handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
-file_handler_formatter = logging.Formatter(
+file_handler = FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+file_handler_formatter = Formatter(
     "[{asctime}] [{levelname:<8}] {name}: {message}",
     "%Y-%m-%d %H:%M:%S",
     style="{",
@@ -152,13 +162,13 @@ class DiscordBot(commands.Bot):
 
     async def init_db(self) -> None:
         self.db_mgr.connect_and_init()
-        print(self.db_mgr.conn, self.db_mgr.cursor)
+        logger.info("Database connection established.")
 
     async def load_cogs(self) -> None:
         """
         The code in this function is executed whenever the bot will start.
         """
-        for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/cogs"):
+        for file in listdir(f"{path.realpath(path.dirname(__file__))}/cogs"):
             if file.endswith(".py"):
                 extension = file[:-3]
                 try:
@@ -182,7 +192,7 @@ class DiscordBot(commands.Bot):
         Setup the game status task of the bot.
         """
         statuses = ["with you!", "with Krypton!", "with humans!"]
-        await self.change_presence(activity=Game(random.choice(statuses)))
+        await self.change_presence(activity=Game(rchoice(statuses)))
 
     @status_task.before_loop
     async def before_status_task(self) -> None:
@@ -197,9 +207,9 @@ class DiscordBot(commands.Bot):
         """
         self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {__version__}")
-        self.logger.info(f"Python version: {platform.python_version()}")
+        self.logger.info(f"Python version: {python_version()}")
         self.logger.info(
-            f"Running on: {platform.system()} {platform.release()} ({os.name})",
+            f"Running on: {system()} {release()} ({name})",
         )
         self.logger.info("-------------------")
         self.db_mgr.connect_and_init()
@@ -330,12 +340,10 @@ class DiscordBot(commands.Bot):
 @bot.event
 async def on_disconnect():
     db.close()
-    print("Bot has disconnected and database connection closed.")
+    logger.info("Bot has disconnected and database connection closed.")
 
-
-load_dotenv()
 
 bot = DiscordBot()
 # tokens: https://www.writebots.com/discord-bot-token/
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = getenv("BOT_TOKEN")
 bot.run(TOKEN)

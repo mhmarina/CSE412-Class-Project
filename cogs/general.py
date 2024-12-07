@@ -13,10 +13,6 @@ from discord import (
 from discord.ext import commands
 from discord.ext.commands import Context
 from discord.ui import Modal, TextInput
-from dotenv import load_dotenv
-
-# import environment variables
-load_dotenv()
 
 
 class FeedbackForm(Modal, title="Feedback"):
