@@ -36,8 +36,7 @@ After that you can start it with
 ```
 python bot.py
 ```
-## Further reading
-<link>https://www.writebots.com/discord-bot-token/<link>
-<br>
-<br>
-> **Note:** May need to replace `python` with `py`, `python3`, `python3.11`, etc. depending on what Python versions you have installed on the machine.
+Note: May need to replace `python` with `py`, `python3`, `python3.11`, etc. depending on what Python versions you have installed on the machine.
+<br/><br/>
+##### This project was created for CSE412: Database Management
+##### Further reading: <link>https://www.writebots.com/discord-bot-token/<link>
